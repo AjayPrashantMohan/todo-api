@@ -17,7 +17,7 @@ app.get('/todos',function(req,res){
 	res.json(todos);
 });
 
-//localhost:3000/todos/query?completed=true
+//localhost:3000/todos/query?completed=true&q=one
 app.get('/todos/query',function(req,res){
 	var queryParams = req.query;
 	var filteredTodos = todos;
@@ -25,6 +25,13 @@ app.get('/todos/query',function(req,res){
 		filteredTodos = _.where(filteredTodos,{completed:true});// _.where finds the all instances with the given id
 	}else if(queryParams.hasOwnProperty("completed") && queryParams.completed =="false"){
 		filteredTodos = _.where(filteredTodos,{completed:false});// _.where finds the all instances with the given id
+	}
+
+
+	if(queryParams.hasOwnProperty('q') && queryParams.q.length>0){
+		filteredTodos = _.filter(filteredTodos,function(todo){ // _.filter will filter the results based on the condition in the callback(its 2nd parameter)
+			return todo.description.toLowerCase().indexOf(queryParams.q) > -1;
+		});
 	}
 	res.json(filteredTodos);
 });
