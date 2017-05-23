@@ -12,8 +12,21 @@ app.get('/',function(req,res){
 	res.send('Hello Ajay');
 });
 
+//localhost:3000/todos/
 app.get('/todos',function(req,res){
 	res.json(todos);
+});
+
+//localhost:3000/todos/query?completed=true
+app.get('/todos/query',function(req,res){
+	var queryParams = req.query;
+	var filteredTodos = todos;
+	if(queryParams.hasOwnProperty("completed") && queryParams.completed =="true"){
+		filteredTodos = _.where(filteredTodos,{completed:true});// _.where finds the all instances with the given id
+	}else if(queryParams.hasOwnProperty("completed") && queryParams.completed =="false"){
+		filteredTodos = _.where(filteredTodos,{completed:false});// _.where finds the all instances with the given id
+	}
+	res.json(filteredTodos);
 });
 
 app.get('/todos/:id',function(req,res){
@@ -29,7 +42,7 @@ app.get('/todos/:id',function(req,res){
 
 app.delete('/todos/:id',function(req,res){
 	var requiredId = parseInt(req.params.id);
-	var matchedRecord = _.findWhere(todos,{id:requiredId});
+	var matchedRecord = _.findWhere(todos,{id:requiredId});// _.findWhere finds the first instance with the given id
 	if(matchedRecord){
 		todos = _.without(todos,matchedRecord);
 		res.json(matchedRecord);
