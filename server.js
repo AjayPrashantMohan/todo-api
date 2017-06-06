@@ -44,14 +44,24 @@ app.get('/todos/query', function(req, res) {
 
 app.get('/todos/:id', function(req, res) {
 	var requiredId = parseInt(req.params.id);
-	var matchedRecord = _.findWhere(todos, {
+
+	db.todo.findById(requiredId).then(function(todo) {
+		if (!!todo) {
+			res.json(todo.toJSON());
+		} else {
+			res.status(404).send();
+		}
+	}, function(e) {
+		res.status(500).send();
+	});
+	/*var matchedRecord = _.findWhere(todos, {
 		id: requiredId
 	});
 	if (matchedRecord) {
 		res.json(matchedRecord);
 	} else {
 		res.status(404).send();
-	}
+	}*/
 });
 
 app.delete('/todos/:id', function(req, res) {
@@ -101,14 +111,11 @@ app.put('/todos/:id', function(req, res) {
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
 
-	db.todo.create(body).then(function(todo){
+	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
-	},function(e){
+	}, function(e) {
 		res.status(400).json(e);
 	})
-
-
-
 
 	/*if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
 		return res.status(400).send(); // 400 is a status for not sending all the required inputs in the request
