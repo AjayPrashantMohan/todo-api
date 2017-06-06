@@ -14,37 +14,36 @@ app.get('/', function(req, res) {
 	res.send('Hello Ajay');
 });
 
-//localhost:3000/todos/
+//localhost:3000/todos
+//localhost:3000/todos?completed=false
+//localhost:3000/todos?completed=true
+//localhost:3000/todos?q=watch
 app.get('/todos', function(req, res) {
-	res.json(todos);
-});
-
-//localhost:3000/todos/query?completed=true&q=one
-app.get('/todos/query', function(req, res) {
 	var queryParams = req.query;
-	var filteredTodos = todos;
+	var where = {};
+
 	if (queryParams.hasOwnProperty("completed") && queryParams.completed == "true") {
-		filteredTodos = _.where(filteredTodos, {
-			completed: true
-		}); // _.where finds the all instances with the given id
+		where.completed = true;
 	} else if (queryParams.hasOwnProperty("completed") && queryParams.completed == "false") {
-		filteredTodos = _.where(filteredTodos, {
-			completed: false
-		}); // _.where finds the all instances with the given id
+		where.completed = false;
 	}
-
-
 	if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-		filteredTodos = _.filter(filteredTodos, function(todo) { // _.filter will filter the results based on the condition in the callback(its 2nd parameter)
-			return todo.description.toLowerCase().indexOf(queryParams.q) > -1;
-		});
+		where.description = {
+			$like: '%' + queryParams.q + '%'
+		}
 	}
-	res.json(filteredTodos);
+	db.todo.findAll({
+		where: where
+	}).then(function(todos) {
+		console.log('done');
+		res.json(todos);
+	}, function(e) {
+		res.status(500).send();
+	});
 });
 
 app.get('/todos/:id', function(req, res) {
 	var requiredId = parseInt(req.params.id);
-
 	db.todo.findById(requiredId).then(function(todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
@@ -54,14 +53,6 @@ app.get('/todos/:id', function(req, res) {
 	}, function(e) {
 		res.status(500).send();
 	});
-	/*var matchedRecord = _.findWhere(todos, {
-		id: requiredId
-	});
-	if (matchedRecord) {
-		res.json(matchedRecord);
-	} else {
-		res.status(404).send();
-	}*/
 });
 
 app.delete('/todos/:id', function(req, res) {
@@ -110,21 +101,11 @@ app.put('/todos/:id', function(req, res) {
 
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
-
 	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
 	}, function(e) {
 		res.status(400).json(e);
 	})
-
-	/*if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-		return res.status(400).send(); // 400 is a status for not sending all the required inputs in the request
-	}
-	body.description = body.description.trim();
-	body.id = todoNextId;
-	todos.push(body);
-	res.send("User with id " + body.id + " is successfully added");
-	todoNextId++;*/
 });
 
 db.sequelize.sync().then(function() {
