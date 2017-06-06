@@ -77,33 +77,31 @@ app.delete('/todos/:id', function(req, res) {
 	})
 });
 
+/*update an entry*/
 app.put('/todos/:id', function(req, res) {
 	var requiredId = parseInt(req.params.id);
-	var matchedRecord = _.findWhere(todos, {
-		id: requiredId
-	});
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
-	var validAttributes = {};
+	var attributes = {};
 
-	if (!matchedRecord) {
-		return res.status(404).send();
+	if (body.hasOwnProperty('completed')) {
+		attributes.completed = body.completed;
 	}
-
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-		validAttributes.completed = body.completed;
-	} else if (body.hasOwnProperty('completed')) {
-		return res.status(400).send();
+	if (body.hasOwnProperty('description')) {
+		attributes.description = body.description;
 	}
-
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-		validAttributes.description = body.description;
-	} else if (body.hasOwnProperty('description')) {
-		return res.status(400).send();
-	}
-	_.extend(matchedRecord, validAttributes);
-	res.json(matchedRecord);
-
-
+	db.todo.findById(requiredId).then(function(todo) {
+		if (todo) {
+			return todo.update(attributes);
+		} else {
+			res.send(404).send();
+		}
+	}, function() {
+		res.status(500).send();
+	}).then(function(todo) {/*promise for when something in update goes wrong */
+		res.json(todo.toJSON());
+	}, function(e) {
+		res.status(400).json(e); //syntx error while update
+	})
 });
 
 /*create an entry*/
