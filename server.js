@@ -14,6 +14,7 @@ app.get('/', function(req, res) {
 	res.send('Hello Ajay');
 });
 
+/*fetch an entry*/
 //localhost:3000/todos
 //localhost:3000/todos?completed=false
 //localhost:3000/todos?completed=true
@@ -42,6 +43,7 @@ app.get('/todos', function(req, res) {
 	});
 });
 
+/*fetch an entry with id*/
 app.get('/todos/:id', function(req, res) {
 	var requiredId = parseInt(req.params.id);
 	db.todo.findById(requiredId).then(function(todo) {
@@ -55,19 +57,24 @@ app.get('/todos/:id', function(req, res) {
 	});
 });
 
+/*delete an entry*/
 app.delete('/todos/:id', function(req, res) {
 	var requiredId = parseInt(req.params.id);
-	var matchedRecord = _.findWhere(todos, {
-		id: requiredId
-	}); // _.findWhere finds the first instance with the given id
-	if (matchedRecord) {
-		todos = _.without(todos, matchedRecord);
-		res.json(matchedRecord);
-	} else {
-		res.status(404).json({
-			"error": "no todo found with that id"
-		});
-	}
+	db.todo.destroy({
+		where: {
+			id: requiredId
+		}
+	}).then(function(rowsDeleted) {
+		if (rowsDeleted === 0) {
+			res.status(404).json({
+				"error": "no todo found with that id"
+			});
+		} else {
+			res.status(204).send();
+		}
+	}, function() {
+		res.status(500).send();
+	})
 });
 
 app.put('/todos/:id', function(req, res) {
@@ -99,6 +106,7 @@ app.put('/todos/:id', function(req, res) {
 
 });
 
+/*create an entry*/
 app.post('/todos', function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
 	db.todo.create(body).then(function(todo) {
