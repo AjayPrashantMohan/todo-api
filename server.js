@@ -97,7 +97,7 @@ app.put('/todos/:id', function(req, res) {
 		}
 	}, function() {
 		res.status(500).send();
-	}).then(function(todo) {/*promise for when something in update goes wrong */
+	}).then(function(todo) { /*promise for when something in update goes wrong */
 		res.json(todo.toJSON());
 	}, function(e) {
 		res.status(400).json(e); //syntx error while update
@@ -112,6 +112,16 @@ app.post('/todos', function(req, res) {
 	}, function(e) {
 		res.status(400).json(e);
 	})
+});
+
+
+app.post('/users', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+	db.user.create(body).then(function(user) {
+		res.json(user.toJSON());
+	}, function(e) {
+		res.status(400).json(e);
+	});
 });
 
 db.sequelize.sync().then(function() {
