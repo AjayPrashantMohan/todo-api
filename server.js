@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
 var bcrypt = require('bcrypt');
+var middleware = require('./middleware.js')(db);
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -20,7 +21,7 @@ app.get('/', function(req, res) {
 //localhost:3000/todos?completed=false
 //localhost:3000/todos?completed=true
 //localhost:3000/todos?q=watch
-app.get('/todos', function(req, res) {
+app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var queryParams = req.query;
 	var where = {};
 
@@ -45,7 +46,7 @@ app.get('/todos', function(req, res) {
 });
 
 /*fetch an entry with id*/
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var requiredId = parseInt(req.params.id);
 	db.todo.findById(requiredId).then(function(todo) {
 		if (!!todo) {
@@ -59,7 +60,7 @@ app.get('/todos/:id', function(req, res) {
 });
 
 /*delete an entry*/
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var requiredId = parseInt(req.params.id);
 	db.todo.destroy({
 		where: {
@@ -79,7 +80,7 @@ app.delete('/todos/:id', function(req, res) {
 });
 
 /*update an entry*/
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var requiredId = parseInt(req.params.id);
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
 	var attributes = {};
@@ -106,7 +107,7 @@ app.put('/todos/:id', function(req, res) {
 });
 
 /*create an entry*/
-app.post('/todos', function(req, res) {
+app.post('/todos', middleware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed'); // use ._pick to only pick the required keys from request
 	db.todo.create(body).then(function(todo) {
 		res.json(todo.toJSON());
@@ -143,7 +144,7 @@ app.post('/users/login', function(req, res) {
 });
 
 db.sequelize.sync({
-	force: true /*drops and creates the table for every server startup*/
+	/*force: true*/ /*drops and creates the table for every server startup*/
 }).then(function() {
 	app.listen(PORT, function() {
 		console.log("Express listening on the port" + PORT + ' !');
