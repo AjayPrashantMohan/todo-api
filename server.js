@@ -115,7 +115,8 @@ app.post('/todos', function(req, res) {
 	})
 });
 
-
+/*create a user in user table*/
+/*localhost:3000/users*/
 app.post('/users', function(req, res) {
 	var body = _.pick(req.body, 'email', 'password');
 	db.user.create(body).then(function(user) {
@@ -125,17 +126,19 @@ app.post('/users', function(req, res) {
 	});
 });
 
+/*Authentictae a user*/
+/*localhost:3000/users/login*/
 app.post('/users/login', function(req, res) {
 	var body = _.pick(req.body, 'email', 'password');
 	db.user.authenticate(body).then(function(user) {
-		res.json(user.toPublicJSON());
+		res.header('Auth', user.generateToken('authentication')).json(user.toPublicJSON());
 	}, function() {
 		res.status(401).send();
 	})
 });
 
 db.sequelize.sync({
-	force: true/*drops and creates the table for every server startup*/
+	force: true /*drops and creates the table for every server startup*/
 }).then(function() {
 	app.listen(PORT, function() {
 		console.log("Express listening on the port" + PORT + ' !');
