@@ -75,11 +75,14 @@ module.exports = function(sequelize, DataTypes) {
 					return undefined;
 				}
 				try {
-					var stringData = JSON.stringify({id:this.get('id'),type:type});
-					var encryptedData = cryptojs.AES.encrypt(stringData,'abc123').toString();
+					var stringData = JSON.stringify({
+						id: this.get('id'),
+						type: type
+					});
+					var encryptedData = cryptojs.AES.encrypt(stringData, 'abc123').toString();
 					var token = jwt.sign({
-						token:encryptedData
-					},'qwerty098');
+						token: encryptedData
+					}, 'qwerty098');
 
 					return token;
 				} catch (e) {
