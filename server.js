@@ -23,7 +23,9 @@ app.get('/', function(req, res) {
 //localhost:3000/todos?q=watch
 app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var queryParams = req.query;
-	var where = {};
+	var where = {
+		userId: req.user.get('id')
+	};
 
 	if (queryParams.hasOwnProperty("completed") && queryParams.completed == "true") {
 		where.completed = true;
@@ -48,7 +50,12 @@ app.get('/todos', middleware.requireAuthentication, function(req, res) {
 /*fetch an entry with id*/
 app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var requiredId = parseInt(req.params.id);
-	db.todo.findById(requiredId).then(function(todo) {
+	db.todo.findOne({
+		where: {
+			id: requiredId,
+			userId: req.user.get('id')
+		}
+	}).then(function(todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
 		} else {
@@ -64,7 +71,8 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	var requiredId = parseInt(req.params.id);
 	db.todo.destroy({
 		where: {
-			id: requiredId
+			id: requiredId,
+			userId: req.user.get('id')
 		}
 	}).then(function(rowsDeleted) {
 		if (rowsDeleted === 0) {
@@ -91,7 +99,12 @@ app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
 	if (body.hasOwnProperty('description')) {
 		attributes.description = body.description;
 	}
-	db.todo.findById(requiredId).then(function(todo) {
+	db.todo.findOne({
+		where: {
+			id: requiredId,
+			userId: req.user.get('id')
+		}
+	}).then(function(todo) {
 		if (todo) {
 			return todo.update(attributes);
 		} else {
@@ -150,7 +163,8 @@ app.post('/users/login', function(req, res) {
 });
 
 db.sequelize.sync({
-	force: true /*drops and creates the table for every server startup*/
+	force: true
+	/*drops and creates the table for every server startup*/
 }).then(function() {
 	app.listen(PORT, function() {
 		console.log("Express listening on the port" + PORT + ' !');
