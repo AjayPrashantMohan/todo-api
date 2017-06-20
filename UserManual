@@ -1,0 +1,114 @@
+Note: 
+
+Every time when the server restarts the tables will be deleted anmd created freshly,to avoid this,comment force :true or set it to false
+in the 179th line of server.js
+
+
+1.Create a User.(User is created in the User Table)
+url: localhost:3000/users (or) https://ajay-todo-api.herokuapp.com/users
+request (POST Method): {
+				           "email":"ajay.mohan1@gmail.com",
+				           "password":"ajay.mohan123"
+		            	}
+
+2.Login with created user.
+url: localhost:3000/users/login (or) https://ajay-todo-api.herokuapp.com/users/login
+request (POST Method): {
+				           "email":"ajay.mohan1@gmail.com",
+				           "password":"ajay.mohan123"
+		            	}
+After logging in,an Auth key is generated in the response header in the Key "Auth".Copy the auth key 
+Sample Key: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbiI6IlUyRnNkR1ZrWDE5TkRSL0FMd29KWDBwbDROcithTkgwWVlDSjVoMHNoYzc3MzMvMkxzZ2VuUEpaUnFPWUUrVVVraElMYy9FdTMxMmwyZ0kxVG93U1NnPT0iLCJpYXQiOjE0OTc5NTIwMDN9.HfouAB5w9Y5A6A2DK56x-foTVs8T4s-19yZucVOnfBI
+
+3.Create a todo(todo is created in the todo table)
+url: localhost:3000/todos (or) https://ajay-todo-api.herokuapp.com/todos
+request (POST Method): {
+				           "description":"watch the baby",
+						   "completed":true
+		            	}
+In the Request header,send the Auth Key generated in the previous step with the Key "Auth" 
+
+4.To get all the todos
+url: localhost:3000/todos (or) https://ajay-todo-api.herokuapp.com/todos
+request (GET Method).
+In the Request header,send the Auth Key generated in the 2nd step with the Key "Auth" 
+
+5.To get a todo with id
+url: localhost:3000/todos/{id} (or) https://ajay-todo-api.herokuapp.com/todos/{id}
+request (GET Method).
+In the Request header,send the Auth Key generated in the 2nd step with the Key "Auth" 
+
+6.To delete a todo with id
+url: localhost:3000/todos/{id} (or) https://ajay-todo-api.herokuapp.com/todos/{id}
+request (DELETE Method).
+In the Request header,send the Auth Key generated in the 2nd step with the Key "Auth" 
+
+7.To update an entry with 
+url: localhost:3000/todos/{id} (or) https://ajay-todo-api.herokuapp.com/todos/{id}
+request (PUT Method)  {
+				           "description":"watch the baby again",
+						   "completed":false
+		            	}
+In the Request header,send the Auth Key generated in the 2nd step with the Key "Auth"
+
+8.Logout a user
+url: localhost:3000/users/login (or) https://ajay-todo-api.herokuapp.com/users/login
+request (DELETE Method).
+In the Request header,send the Auth Key generated in the 2nd step with the Key "Auth"
+
+
+All the below API can be accessed via AJAX also
+Check the follwing examples
+
+1.getting all the records through ajax (GET):-
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log(JSON.parse(this.responseText));
+    }
+  };
+  xhttp.open("GET", "https://ajay-todo-api.herokuapp.com/todos", true);
+  xhttp.send();
+}
+loadDoc();
+
+2.posting records through ajax(POST):-
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log('done');
+    }
+  };
+  xhttp.open("POST", "https://ajay-todo-api.herokuapp.com/todos", true);
+  xhttp.setRequestHeader("Content-Type", "application/json");
+  xhttp.send(JSON.stringify({description:"go for a movie",completed :false}));
+}
+
+3.Deleting a record through ajax(DELETE):-
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 204) {
+      console.log("Deleted");
+    }
+  };
+  xhttp.open("DELETE", "https://ajay-todo-api.herokuapp.com/todos/{id}", true);
+  xhttp.send();
+}
+loadDoc();
+
+4.Updating a record through ajax(PUT):-
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log('done');
+    }
+  };
+  xhttp.open("PUT", "https://ajay-todo-api.herokuapp.com/todos/7", true);
+  xhttp.setRequestHeader("Content-Type", "application/json");
+  xhttp.send(JSON.stringify({description:"go for a walk",completed :true}));
+}
+loadDoc();
