@@ -14,7 +14,7 @@ module.exports = function(sequelize, DataTypes) {
 				this.setDataValue('tokenHash', hash);
 			}
 		},
-		tokenHash:{
+		tokenHash: {
 			type: DataTypes.STRING
 		}
 	});
